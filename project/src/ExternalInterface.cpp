@@ -287,6 +287,22 @@ namespace lime {
 	}
 
 
+	int lime_application_batch_update (value application, int numEvents) {
+
+		Application* app = (Application*)val_data (application);
+		return app->BatchUpdate (numEvents);
+
+	}
+
+
+	HL_PRIM int HL_NAME(hl_application_batch_update) (HL_CFFIPointer* application, int numEvents) {
+
+		Application* app = (Application*)application->ptr;
+		return app->BatchUpdate (numEvents);
+
+	}
+
+
 	value lime_audio_load_bytes (value data, value buffer) {
 
 		Resource resource;
@@ -3201,6 +3217,22 @@ namespace lime {
 	}
 
 
+	value lime_window_create_from (value application, int foreignHandle, int renderFlags) {
+
+		Window* window = CreateWindowFrom ((Application*)val_data (application), reinterpret_cast<void*> (foreignHandle), renderFlags);
+		return CFFIPointer (window, gc_window);
+
+	}
+
+
+	HL_PRIM HL_CFFIPointer* HL_NAME(hl_window_create_from) (HL_CFFIPointer* application, int foreignHandle, int renderFlags) {
+
+		Window* window = CreateWindowFrom ((Application*)application->ptr, reinterpret_cast<void*> (foreignHandle), renderFlags);
+		return HLCFFIPointer (window, (hl_finalizer)hl_gc_window);
+
+	}
+
+
 	void lime_window_event_manager_register (value callback, value eventObject) {
 
 		WindowEvent::callback = new ValuePointer (callback);
@@ -3666,8 +3698,7 @@ namespace lime {
 		targetWindow->SetTextInputEnabled (enabled);
 
 	}
-
-
+	
 	void lime_window_set_text_input_rect (value window, value rect) {
 
 		Window* targetWindow = (Window*)val_data (window);
@@ -3808,6 +3839,7 @@ namespace lime {
 	DEFINE_PRIME1 (lime_application_quit);
 	DEFINE_PRIME2v (lime_application_set_frame_rate);
 	DEFINE_PRIME1 (lime_application_update);
+	DEFINE_PRIME2 (lime_application_batch_update);
 	DEFINE_PRIME2 (lime_audio_load);
 	DEFINE_PRIME2 (lime_audio_load_bytes);
 	DEFINE_PRIME2 (lime_audio_load_file);
@@ -3921,6 +3953,7 @@ namespace lime {
 	DEFINE_PRIME1v (lime_window_context_make_current);
 	DEFINE_PRIME1v (lime_window_context_unlock);
 	DEFINE_PRIME5 (lime_window_create);
+	DEFINE_PRIME3 (lime_window_create_from);
 	DEFINE_PRIME2v (lime_window_event_manager_register);
 	DEFINE_PRIME1v (lime_window_focus);
 	DEFINE_PRIME1 (lime_window_get_context);
@@ -3986,6 +4019,7 @@ namespace lime {
 	#define _TARRAY2 _OBJ (_ARR)
 
 
+	DEFINE_HL_PRIM (_BOOL, hl_application_batch_update, _TCFFIPOINTER _I32);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_application_create, _NO_ARG);
 	DEFINE_HL_PRIM (_VOID, hl_application_event_manager_register, _FUN(_VOID, _NO_ARG) _TAPPLICATION_EVENT);
 	DEFINE_HL_PRIM (_I32, hl_application_exec, _TCFFIPOINTER);
@@ -4016,7 +4050,6 @@ namespace lime {
 	DEFINE_HL_PRIM (_I32, hl_file_watcher_add_directory, _TCFFIPOINTER _STRING _BOOL);
 	DEFINE_HL_PRIM (_VOID, hl_file_watcher_remove_directory, _TCFFIPOINTER _I32);
 	DEFINE_HL_PRIM (_VOID, hl_file_watcher_update, _TCFFIPOINTER);
-	DEFINE_HL_PRIM (_I32, hl_font_get_ascender, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_I32, hl_font_get_descender, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_BYTES, hl_font_get_family_name, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_I32, hl_font_get_glyph_index, _TCFFIPOINTER _STRING);
@@ -4105,7 +4138,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_context_make_current, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_context_unlock, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING);
-	DEFINE_HL_PRIM (_VOID, hl_window_event_manager_register, _FUN (_VOID, _NO_ARG) _TWINDOW_EVENT);
+	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create_from, _TCFFIPOINTER _I32 _I32);
 	DEFINE_HL_PRIM (_VOID, hl_window_focus, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_F64, hl_window_get_context, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_BYTES, hl_window_get_context_type, _TCFFIPOINTER);

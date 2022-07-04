@@ -3,6 +3,7 @@
 
 
 #include <SDL.h>
+#include <app/Application.h>
 #include <graphics/ImageBuffer.h>
 #include <ui/Cursor.h>
 #include <ui/Window.h>
@@ -15,8 +16,10 @@ namespace lime {
 
 		public:
 
-			SDLWindow (Application* application, int width, int height, int flags, const char* title);
+			SDLWindow (Application* application);
 			~SDLWindow ();
+
+			virtual void Create(int width, int height, int flags, const char* title);
 
 			virtual void Alert (const char* message, const char* title);
 			virtual void Close ();
@@ -59,7 +62,7 @@ namespace lime {
 			SDL_Texture* sdlTexture;
 			SDL_Window* sdlWindow;
 
-		private:
+		protected:
 
 			SDL_GLContext context;
 			int contextHeight;

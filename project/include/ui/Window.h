@@ -22,6 +22,7 @@ namespace lime {
 
 		public:
 
+			Window (Application* application) { currentApplication = application; }
 			virtual ~Window () {};
 
 			virtual void Alert (const char* message, const char* title) = 0;
@@ -69,6 +70,7 @@ namespace lime {
 
 
 	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title);
+	Window* CreateWindowFrom(Application* application, const void* foreignHandle, int renderFlags);
 
 
 	enum WindowFlags {

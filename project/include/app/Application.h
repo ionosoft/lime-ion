@@ -22,6 +22,7 @@ namespace lime {
 			virtual int Quit () = 0;
 			virtual void SetFrameRate (double frameRate) = 0;
 			virtual bool Update () = 0;
+			virtual int BatchUpdate (int numEvents) = 0;
 
 
 	};

@@ -253,6 +253,7 @@
 			<file name="src/backend/sdl/SDLMutex.cpp" />
 			<file name="src/backend/sdl/SDLSystem.cpp" />
 			<file name="src/backend/sdl/SDLWindow.cpp" />
+			<file name="src/backend/sdl/SDLForeignWindow.cpp" />
 
 		</section>
 

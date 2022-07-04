@@ -31,8 +31,8 @@ namespace lime {
 	static bool displayModeSet = false;
 
 
-	SDLWindow::SDLWindow (Application* application, int width, int height, int flags, const char* title) {
-
+	SDLWindow::SDLWindow (Application* application) : Window (application) {
+	
 		sdlTexture = 0;
 		sdlRenderer = 0;
 		context = 0;
@@ -40,7 +40,33 @@ namespace lime {
 		contextWidth = 0;
 		contextHeight = 0;
 
-		currentApplication = application;
+	}
+	
+	
+	SDLWindow::~SDLWindow () {
+
+		if (sdlWindow) {
+
+			SDL_DestroyWindow (sdlWindow);
+			sdlWindow = 0;
+
+		}
+
+		if (sdlRenderer) {
+
+			SDL_DestroyRenderer (sdlRenderer);
+
+		} else if (context) {
+
+			SDL_GL_DeleteContext (context);
+
+		}
+
+	}
+
+
+	void SDLWindow::Create (int width, int height, int flags, const char* title) {
+
 		this->flags = flags;
 
 		int sdlWindowFlags = 0;
@@ -287,28 +313,6 @@ namespace lime {
 		} else {
 
 			printf ("Could not create SDL renderer: %s.\n", SDL_GetError ());
-
-		}
-
-	}
-
-
-	SDLWindow::~SDLWindow () {
-
-		if (sdlWindow) {
-
-			SDL_DestroyWindow (sdlWindow);
-			sdlWindow = 0;
-
-		}
-
-		if (sdlRenderer) {
-
-			SDL_DestroyRenderer (sdlRenderer);
-
-		} else if (context) {
-
-			SDL_GL_DeleteContext (context);
 
 		}
 
@@ -1048,8 +1052,7 @@ namespace lime {
 		}
 
 	}
-
-
+	
 	void SDLWindow::SetTextInputRect (Rectangle * rect) {
 
 		SDL_Rect bounds = { 0, 0, 0, 0 };
@@ -1085,7 +1088,9 @@ namespace lime {
 
 	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title) {
 
-		return new SDLWindow (application, width, height, flags, title);
+		SDLWindow* window = new SDLWindow(application);
+		window->Create(width, height, flags, title);
+		return window;
 
 	}
 
