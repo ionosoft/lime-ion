@@ -1,6 +1,7 @@
 package lime.app;
 
 import lime.graphics.RenderContext;
+import lime.graphics.RenderContextAttributes;
 import lime.system.System;
 import lime.ui.Gamepad;
 import lime.ui.GamepadAxis;
@@ -97,7 +98,7 @@ class Application extends Module
 	{
 		super();
 
-		if (Application.current == null)
+		if (Application.current == null || Application.current != this)
 		{
 			Application.current = this;
 		}
@@ -138,6 +139,40 @@ class Application extends Module
 	}
 
 	/**
+		Creates a new Window and adds it to the Application
+		@param	foreignHandle A handle to an OS window to add
+		@param	attributes	  A set of parameters used to initialize the renderer
+	**/
+	public function createWindowFrom(foreignHandle:Int, attributes:RenderContextAttributes, maxTries:Int = 5):Window
+	{
+		var tries:Int = 0;
+		var window:Window = null;
+		while (tries < maxTries) {
+			window = __createWindowFrom(foreignHandle, attributes);
+			if (window != null) break;
+			tries++;
+		}
+		if (window == null) {
+			//... Pump some helpful error here. Just a trace for now.
+			trace('Could not create window');
+		} else {
+			__addWindow(window);
+		}
+		return window;
+	}
+
+/**
+		Prepare to execute the application piecemeal. This method
+		only needs to be called if batchUpdate() is going to
+		be used for the event loop
+	**/
+	public function init():Void
+	{
+		Application.current = this;
+		__backend.init ();
+	}
+
+	/**
 		Execute the Application. On native platforms, this method
 		blocks until the application is finished running. On other
 		platforms, it will return immediately
@@ -148,6 +183,16 @@ class Application extends Module
 		Application.current = this;
 
 		return __backend.exec();
+	}
+
+	/**
+		Pump and handle a set of pending events, then return
+		@param  numEvents The maximum number of events to process
+		@return			  The number of events handled, -1 if the event loop should exit
+	**/
+	public function batchUpdate(numEvents:Int):Int
+	{
+		return __backend.batchUpdate(numEvents);
 	}
 
 	/**
@@ -505,8 +550,23 @@ class Application extends Module
 
 	@:noCompletion private function __createWindow(attributes:WindowAttributes):Window
 	{
-		var window = new Window(this, attributes);
-		if (window.id == -1) return null;
+		var window = new Window(this);
+		window.create(attributes);
+		if (window.id == -1) {
+			@:privateAccess window.__created = false;
+			return null;
+		}
+		return window;
+	}
+
+	@:noCompletion private function __createWindowFrom(foreignHandle:Int, attributes:RenderContextAttributes):Window
+	{
+		var window = new Window(this);
+		window.createFrom(foreignHandle, attributes);
+		if (window.id == -1) {
+			@:privateAccess window.__created = false;
+			return null;
+		}
 		return window;
 	}
 

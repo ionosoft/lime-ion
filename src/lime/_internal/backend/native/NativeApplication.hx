@@ -15,9 +15,9 @@ import lime.system.JNI;
 import lime.system.Sensor;
 import lime.system.SensorType;
 import lime.system.System;
-import lime.ui.Gamepad;
-import lime.ui.Joystick;
-import lime.ui.JoystickHatPosition;
+//import lime.ui.Gamepad;
+//import lime.ui.Joystick;
+//import lime.ui.JoystickHatPosition;
 import lime.ui.KeyCode;
 import lime.ui.KeyModifier;
 import lime.ui.Touch;
@@ -37,8 +37,8 @@ import lime.ui.Window;
 @:access(lime.graphics.Renderer)
 @:access(lime.system.Clipboard)
 @:access(lime.system.Sensor)
-@:access(lime.ui.Gamepad)
-@:access(lime.ui.Joystick)
+//@:access(lime.ui.Gamepad)
+//@:access(lime.ui.Joystick)
 @:access(lime.ui.Window)
 class NativeApplication
 {
@@ -46,8 +46,8 @@ class NativeApplication
 	private var clipboardEventInfo = new ClipboardEventInfo();
 	private var currentTouches = new Map<Int, Touch>();
 	private var dropEventInfo = new DropEventInfo();
-	private var gamepadEventInfo = new GamepadEventInfo();
-	private var joystickEventInfo = new JoystickEventInfo();
+	//private var gamepadEventInfo = new GamepadEventInfo();
+	//private var joystickEventInfo = new JoystickEventInfo();
 	private var keyEventInfo = new KeyEventInfo();
 	private var mouseEventInfo = new MouseEventInfo();
 	private var renderEventInfo = new RenderEventInfo(RENDER);
@@ -59,6 +59,7 @@ class NativeApplication
 
 	public var handle:Dynamic;
 
+	private var initialized:Bool;
 	private var pauseTimer:Int;
 	private var parent:Application;
 	private var toggleFullscreen:Bool;
@@ -72,6 +73,7 @@ class NativeApplication
 
 	public function new(parent:Application):Void
 	{
+		initialized = false;
 		this.parent = parent;
 		pauseTimer = -1;
 		toggleFullscreen = true;
@@ -102,29 +104,73 @@ class NativeApplication
 		#end
 	}
 
+	public function init():Void
+	{
+		if (!initialized) {
+			#if (!macro && lime_cffi)
+			// NOTE: Patch to set certain event's windowID to our primary window id bc createWindowFrom will set id to 1 instead of 0
+			parent.window.focus();
+			if (!parent.__windowByID.exists(keyEventInfo.windowID)) {
+				trace('No such window. Setting keyEventInfo.windowID ${keyEventInfo.windowID} to primary windowID ${parent.window.id}');
+				keyEventInfo.windowID = parent.window.id;
+			}
+			if (!parent.__windowByID.exists(mouseEventInfo.windowID)) {
+				trace('No such window. Setting mouseEventInfo.windowID ${mouseEventInfo.windowID} to primary windowID ${parent.window.id}');
+				mouseEventInfo.windowID = parent.window.id;
+			}
+			if (!parent.__windowByID.exists(textEventInfo.windowID)) {
+				trace('No such window. Setting textEventInfo.windowID ${textEventInfo.windowID} to primary windowID ${parent.window.id}');
+				textEventInfo.windowID = parent.window.id;
+			}
+			if (!parent.__windowByID.exists(windowEventInfo.windowID)) {
+				trace('No such window. Setting windowEventInfo.windowID ${windowEventInfo.windowID} to primary windowID ${parent.window.id}');
+				windowEventInfo.windowID = parent.window.id;
+			}
+
+			NativeCFFI.lime_application_event_manager_register(handleApplicationEvent, applicationEventInfo);
+			NativeCFFI.lime_clipboard_event_manager_register(handleClipboardEvent, clipboardEventInfo);
+			NativeCFFI.lime_drop_event_manager_register(handleDropEvent, dropEventInfo);
+			//NativeCFFI.lime_gamepad_event_manager_register(handleGamepadEvent, gamepadEventInfo);
+			//NativeCFFI.lime_joystick_event_manager_register(handleJoystickEvent, joystickEventInfo);
+			NativeCFFI.lime_key_event_manager_register(handleKeyEvent, keyEventInfo);
+			NativeCFFI.lime_mouse_event_manager_register(handleMouseEvent, mouseEventInfo);
+			NativeCFFI.lime_render_event_manager_register(handleRenderEvent, renderEventInfo);
+			NativeCFFI.lime_text_event_manager_register(handleTextEvent, textEventInfo);
+			NativeCFFI.lime_touch_event_manager_register(handleTouchEvent, touchEventInfo);
+			NativeCFFI.lime_window_event_manager_register(handleWindowEvent, windowEventInfo);
+			#if (ios || android || tvos)
+			NativeCFFI.lime_sensor_event_manager_register(handleSensorEvent, sensorEventInfo);
+			#end
+
+			#if (nodejs && lime_cffi)
+			NativeCFFI.lime_application_init(handle);
+			#end
+			#end
+
+			initialized = true;
+		}
+	}
+
+	public function batchUpdate(numEvents:Int):Int
+	{
+		#if (!macro && lime_cffi)
+		if (handle == null || numEvents == 0) return 0;
+		
+		return NativeCFFI.lime_application_batch_update(handle, numEvents);
+
+		#else
+
+		return 0;
+
+		#end
+	}
+
 	public function exec():Int
 	{
+		init();
+
 		#if !macro
-		#if lime_cffi
-		NativeCFFI.lime_application_event_manager_register(handleApplicationEvent, applicationEventInfo);
-		NativeCFFI.lime_clipboard_event_manager_register(handleClipboardEvent, clipboardEventInfo);
-		NativeCFFI.lime_drop_event_manager_register(handleDropEvent, dropEventInfo);
-		NativeCFFI.lime_gamepad_event_manager_register(handleGamepadEvent, gamepadEventInfo);
-		NativeCFFI.lime_joystick_event_manager_register(handleJoystickEvent, joystickEventInfo);
-		NativeCFFI.lime_key_event_manager_register(handleKeyEvent, keyEventInfo);
-		NativeCFFI.lime_mouse_event_manager_register(handleMouseEvent, mouseEventInfo);
-		NativeCFFI.lime_render_event_manager_register(handleRenderEvent, renderEventInfo);
-		NativeCFFI.lime_text_event_manager_register(handleTextEvent, textEventInfo);
-		NativeCFFI.lime_touch_event_manager_register(handleTouchEvent, touchEventInfo);
-		NativeCFFI.lime_window_event_manager_register(handleWindowEvent, windowEventInfo);
-		#if (ios || android || tvos)
-		NativeCFFI.lime_sensor_event_manager_register(handleSensorEvent, sensorEventInfo);
-		#end
-		#end
-
 		#if (nodejs && lime_cffi)
-		NativeCFFI.lime_application_init(handle);
-
 		var eventLoop = function()
 		{
 			var active = NativeCFFI.lime_application_update(handle);
@@ -142,6 +188,7 @@ class NativeApplication
 
 		untyped setImmediate(eventLoop);
 		return 0;
+
 		#elseif lime_cffi
 		var result = NativeCFFI.lime_application_exec(handle);
 
@@ -191,7 +238,7 @@ class NativeApplication
 		}
 	}
 
-	private function handleGamepadEvent():Void
+	/*private function handleGamepadEvent():Void
 	{
 		switch (gamepadEventInfo.type)
 		{
@@ -245,10 +292,15 @@ class NativeApplication
 			case DISCONNECT:
 				Joystick.__disconnect(joystickEventInfo.id);
 		}
-	}
+	}*/
 
 	private function handleKeyEvent():Void
 	{
+		// NOTE: Patch to set certain event's windowID to our primary window id bc createWindowFrom will set id to 1 instead of 0
+		if (!parent.__windowByID.exists(keyEventInfo.windowID)) {
+			keyEventInfo.windowID = parent.window.id;
+		}
+
 		var window = parent.__windowByID.get(keyEventInfo.windowID);
 
 		if (window != null)
@@ -257,7 +309,7 @@ class NativeApplication
 			var int32:Float = keyEventInfo.keyCode;
 			var keyCode:KeyCode = Std.int(int32);
 			var modifier:KeyModifier = keyEventInfo.modifier;
-
+			
 			switch (type)
 			{
 				case KEY_DOWN:
@@ -328,6 +380,11 @@ class NativeApplication
 
 	private function handleMouseEvent():Void
 	{
+		// NOTE: Patch to set certain event's windowID to our primary window id bc createWindowFrom will set id to 1 instead of 0
+		if (!parent.__windowByID.exists(mouseEventInfo.windowID)) {
+			mouseEventInfo.windowID = parent.window.id;
+		}
+
 		var window = parent.__windowByID.get(mouseEventInfo.windowID);
 
 		if (window != null)
@@ -419,6 +476,11 @@ class NativeApplication
 
 	private function handleTextEvent():Void
 	{
+		// NOTE: Patch to set certain event's windowID to our primary window id bc createWindowFrom will set id to 1 instead of 0
+		if (!parent.__windowByID.exists(textEventInfo.windowID)) {
+			textEventInfo.windowID = parent.window.id;
+		}
+
 		var window = parent.__windowByID.get(textEventInfo.windowID);
 
 		if (window != null)
@@ -501,6 +563,11 @@ class NativeApplication
 
 	private function handleWindowEvent():Void
 	{
+		// NOTE: Patch to set certain event's windowID to our primary window id bc createWindowFrom will set id to 1 instead of 0
+		if (!parent.__windowByID.exists(windowEventInfo.windowID)) {
+			windowEventInfo.windowID = parent.window.id;
+		}
+
 		var window = parent.__windowByID.get(windowEventInfo.windowID);
 
 		if (window != null)

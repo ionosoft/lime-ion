@@ -106,6 +106,7 @@ class Window
 	@:noCompletion private var __width:Int;
 	@:noCompletion private var __x:Int;
 	@:noCompletion private var __y:Int;
+	@:noCompletion private var __created:Bool;
 
 	#if commonjs
 	private static function __init__()
@@ -134,12 +135,11 @@ class Window
 	}
 	#end
 
-	@:noCompletion private function new(application:Application, attributes:WindowAttributes)
+	@:noCompletion private function new(application:Application)
 	{
-		this.application = application;
-		__attributes = attributes != null ? attributes : {};
+		__created = false;
 
-		if (Reflect.hasField(__attributes, "parameters")) parameters = __attributes.parameters;
+		this.application = application;
 
 		__width = 0;
 		__height = 0;
@@ -149,8 +149,6 @@ class Window
 		__y = 0;
 		__title = "";
 		id = -1;
-
-		__backend = new WindowBackend(this);
 
 		#if windows
 		var mappings = [
@@ -355,6 +353,31 @@ class Window
 
 		Gamepad.addMappings(mappings);
 		#end
+	}
+
+	public function create(attributes:WindowAttributes):Void
+	{
+		if (__created) return;
+
+		__attributes = attributes != null ? attributes : {};
+		if (Reflect.hasField(__attributes, "parameters")) parameters = __attributes.parameters;
+
+		__backend = new WindowBackend(this);
+		__backend.create();
+
+		__created = true;
+	}
+
+	public function createFrom(foreignHandle:Int, attributes:RenderContextAttributes):Void
+	{
+		if (__created) return;
+
+		__attributes = attributes != null ? { context : attributes } : {};
+
+		__backend = new WindowBackend(this);
+		__backend.createFrom(foreignHandle);
+
+		__created = true;
 	}
 
 	public function alert(message:String = null, title:String = null):Void

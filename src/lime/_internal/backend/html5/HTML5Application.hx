@@ -23,11 +23,13 @@ import lime.ui.Window;
 @:access(lime.ui.Window)
 class HTML5Application
 {
+	#if !noGameDevice
+	private var gameDeviceCache = new Map<Int, GameDeviceData>();
+	#end
 	private var accelerometer:Sensor;
 	private var currentUpdate:Float;
 	private var deltaTime:Float;
 	private var framePeriod:Float;
-	private var gameDeviceCache = new Map<Int, GameDeviceData>();
 	private var hidden:Bool;
 	private var lastUpdate:Float;
 	private var nextUpdate:Float;
@@ -36,8 +38,11 @@ class HTML5Application
 	private var stats:Dynamic;
 	#end
 
+	private var initialized:Bool;
+
 	public inline function new(parent:Application)
 	{
+		initialized = false;
 		this.parent = parent;
 
 		currentUpdate = 0;
@@ -269,19 +274,31 @@ class HTML5Application
 		return keyCode;
 	}
 
+	public function init():Void
+	{
+		if (!initialized) {
+			Browser.window.addEventListener("keydown", handleKeyEvent, false);
+			Browser.window.addEventListener("keyup", handleKeyEvent, false);
+			Browser.window.addEventListener("focus", handleWindowEvent, false);
+			Browser.window.addEventListener("blur", handleWindowEvent, false);
+			Browser.window.addEventListener("resize", handleWindowEvent, false);
+			Browser.window.addEventListener("beforeunload", handleWindowEvent, false);
+			Browser.window.addEventListener("devicemotion", handleSensorEvent, false);
+
+			#if stats
+			stats = untyped #if haxe4 js.Syntax.code #else __js__ #end("new Stats ()");
+			stats.domElement.style.position = "absolute";
+			stats.domElement.style.top = "0px";
+			Browser.document.body.appendChild(stats.domElement);
+			#end
+
+			initialized = true;
+		}
+	}
+
 	public function exec():Int
 	{
-		Browser.window.addEventListener("keydown", handleKeyEvent, false);
-		Browser.window.addEventListener("keyup", handleKeyEvent, false);
-		Browser.window.addEventListener("focus", handleWindowEvent, false);
-		Browser.window.addEventListener("blur", handleWindowEvent, false);
-		Browser.window.addEventListener("resize", handleWindowEvent, false);
-		Browser.window.addEventListener("beforeunload", handleWindowEvent, false);
-
-		if (Reflect.hasField(Browser.window, "Accelerometer"))
-		{
-			Browser.window.addEventListener("devicemotion", handleSensorEvent, false);
-		}
+		init();
 
 		#if stats
 		stats = untyped #if haxe4 js.Syntax.code #else __js__ #end ("new Stats ()");
@@ -348,6 +365,8 @@ class HTML5Application
 		return 0;
 	}
 
+	public function batchUpdate(numEvents:Int):Int { return 0; }
+
 	public function exit():Void {}
 
 	private function handleApplicationEvent(?__):Void
@@ -359,7 +378,9 @@ class HTML5Application
 			window.__backend.updateSize();
 		}
 
+		#if !noGameDevice
 		updateGameDevices();
+		#end
 
 		currentUpdate = Date.now().getTime();
 
@@ -508,6 +529,7 @@ class HTML5Application
 		}
 	}
 
+	#if !noGameDevice
 	private function updateGameDevices():Void
 	{
 		var devices = Joystick.__getDeviceData();
@@ -649,8 +671,10 @@ class HTML5Application
 			}
 		}
 	}
+	#end
 }
 
+#if !noGameDevice
 class GameDeviceData
 {
 	public var connected:Bool;
@@ -666,3 +690,4 @@ class GameDeviceData
 		axes = [];
 	}
 }
+#end

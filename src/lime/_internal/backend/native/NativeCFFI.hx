@@ -69,6 +69,8 @@ class NativeCFFI
 
 	@:cffi private static function lime_application_update(handle:Dynamic):Bool;
 
+	@:cffi private static function lime_application_batch_update(handle:Dynamic, numEvents:Int):Int;
+
 	@:cffi private static function lime_audio_load(data:Dynamic, buffer:Dynamic):Dynamic;
 
 	@:cffi private static function lime_audio_load_bytes(data:Dynamic, buffer:Dynamic):Dynamic;
@@ -289,6 +291,8 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_create(application:Dynamic, width:Int, height:Int, flags:Int, title:String):Dynamic;
 
+	@:cffi private static function lime_window_create_from(application:Dynamic, foreignHandle:Int, renderFlags:Int):Dynamic;
+
 	@:cffi private static function lime_window_focus(handle:Dynamic):Void;
 
 	@:cffi private static function lime_window_get_context(handle:Dynamic):Float;
@@ -362,6 +366,8 @@ class NativeCFFI
 	private static var lime_application_set_frame_rate = new cpp.Callable<cpp.Object->Float->cpp.Void>(cpp.Prime._loadPrime("lime",
 		"lime_application_set_frame_rate", "odv", false));
 	private static var lime_application_update = new cpp.Callable<cpp.Object->Bool>(cpp.Prime._loadPrime("lime", "lime_application_update", "ob", false));
+	private static var lime_application_batch_update = new cpp.Callable<cpp.Object->Int->Int>(cpp.Prime
+		._loadPrime("lime", "lime_application_batch_update", "oii", false));
 	private static var lime_audio_load = new cpp.Callable<cpp.Object->cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_audio_load", "ooo", false));
 	private static var lime_audio_load_bytes = new cpp.Callable<cpp.Object->cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_audio_load_bytes",
 		"ooo", false));
@@ -553,6 +559,8 @@ class NativeCFFI
 		false));
 	private static var lime_window_create = new cpp.Callable<cpp.Object->Int->Int->Int->String->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_create",
 		"oiiiso", false));
+	private static var lime_window_create_from = new cpp.Callable<cpp.Object->Int->Int->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_create_from",
+		"oiio", false));
 	private static var lime_window_focus = new cpp.Callable<cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_focus", "ov", false));
 	private static var lime_window_get_context = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_context", "od", false));
 	private static var lime_window_get_context_type = new cpp.Callable<cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_get_context_type",
@@ -617,6 +625,7 @@ class NativeCFFI
 	private static var lime_application_quit = CFFI.load("lime", "lime_application_quit", 1);
 	private static var lime_application_set_frame_rate = CFFI.load("lime", "lime_application_set_frame_rate", 2);
 	private static var lime_application_update = CFFI.load("lime", "lime_application_update", 1);
+	private static var lime_application_batch_update = CFFI.load("lime", "lime_application_batch_update", 2);
 	private static var lime_audio_load = CFFI.load("lime", "lime_audio_load", 2);
 	private static var lime_audio_load_bytes = CFFI.load("lime", "lime_audio_load_bytes", 2);
 	private static var lime_audio_load_file = CFFI.load("lime", "lime_audio_load_file", 2);
@@ -725,6 +734,7 @@ class NativeCFFI
 	private static var lime_window_context_make_current = CFFI.load("lime", "lime_window_context_make_current", 1);
 	private static var lime_window_context_unlock = CFFI.load("lime", "lime_window_context_unlock", 1);
 	private static var lime_window_create = CFFI.load("lime", "lime_window_create", 5);
+	private static var lime_window_create_from = CFFI.load("lime", "lime_window_create_from", 3);
 	private static var lime_window_focus = CFFI.load("lime", "lime_window_focus", 1);
 	private static var lime_window_get_context = CFFI.load("lime", "lime_window_get_context", 1);
 	private static var lime_window_get_context_type = CFFI.load("lime", "lime_window_get_context_type", 1);
@@ -785,6 +795,11 @@ class NativeCFFI
 	@:hlNative("lime", "hl_application_update") private static function lime_application_update(handle:CFFIPointer):Bool
 	{
 		return false;
+	}
+
+	@:hlNative("lime", "lime_application_batch_update") private static function lime_application_batch_update(handle:CFFIPointer, value:Int):Int
+	{
+		return 0;
 	}
 
 	// @:cffi private static function lime_audio_load (data:Dynamic, buffer:Dynamic):Dynamic;

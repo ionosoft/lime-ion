@@ -13,6 +13,7 @@ import lime.graphics.Image;
 import lime.graphics.ImageBuffer;
 import lime.graphics.OpenGLRenderContext;
 import lime.graphics.RenderContext;
+import lime.graphics.RenderContextAttributes;
 import lime.math.Rectangle;
 import lime.math.Vector2;
 import lime.system.Display;
@@ -40,6 +41,7 @@ class NativeWindow
 {
 	public var handle:Dynamic;
 
+	private var created:Bool;
 	private var closing:Bool;
 	private var cursor:MouseCursor;
 	private var displayMode:DisplayMode;
@@ -55,15 +57,35 @@ class NativeWindow
 
 	public function new(parent:Window)
 	{
+		created = false;
 		this.parent = parent;
 
 		cursor = DEFAULT;
 		displayMode = new DisplayMode(0, 0, 0, 0);
+	}
+
+	public function create()
+	{
+		if (created) {
+			return;
+		}
 
 		var attributes = parent.__attributes;
-		var contextAttributes = Reflect.hasField(attributes, "context") ? attributes.context : {};
+		var width = Reflect.hasField(attributes, "width") ? attributes.width : #if desktop 800 #else 0 #end;
+		var height = Reflect.hasField(attributes, "height") ? attributes.height : #if desktop 600 #else 0 #end;
 		var title = Reflect.hasField(attributes, "title") ? attributes.title : "Lime Application";
 		var flags = 0;
+
+		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI) flags |= cast WindowFlags.WINDOW_FLAG_ALLOW_HIGHDPI;
+		if (Reflect.hasField(attributes, "alwaysOnTop") && attributes.alwaysOnTop) flags |= cast WindowFlags.WINDOW_FLAG_ALWAYS_ON_TOP;
+		if (Reflect.hasField(attributes, "borderless") && attributes.borderless) flags |= cast WindowFlags.WINDOW_FLAG_BORDERLESS;
+		if (Reflect.hasField(attributes, "fullscreen") && attributes.fullscreen) flags |= cast WindowFlags.WINDOW_FLAG_FULLSCREEN;
+		if (Reflect.hasField(attributes, "hidden") && attributes.hidden) flags |= cast WindowFlags.WINDOW_FLAG_HIDDEN;
+		if (Reflect.hasField(attributes, "maximized") && attributes.maximized) flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
+		if (Reflect.hasField(attributes, "minimized") && attributes.minimized) flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
+		if (Reflect.hasField(attributes, "resizable") && attributes.resizable) flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
+
+		var contextAttributes = Reflect.hasField(attributes, "context") ? attributes.context : {};
 
 		if (!Reflect.hasField(contextAttributes, "antialiasing")) contextAttributes.antialiasing = 0;
 		if (!Reflect.hasField(contextAttributes, "background")) contextAttributes.background = 0;
@@ -77,15 +99,6 @@ class NativeWindow
 		contextAttributes.type = CAIRO;
 		#end
 		if (Reflect.hasField(contextAttributes, "type") && contextAttributes.type == CAIRO) contextAttributes.hardware = false;
-
-		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI) flags |= cast WindowFlags.WINDOW_FLAG_ALLOW_HIGHDPI;
-		if (Reflect.hasField(attributes, "alwaysOnTop") && attributes.alwaysOnTop) flags |= cast WindowFlags.WINDOW_FLAG_ALWAYS_ON_TOP;
-		if (Reflect.hasField(attributes, "borderless") && attributes.borderless) flags |= cast WindowFlags.WINDOW_FLAG_BORDERLESS;
-		if (Reflect.hasField(attributes, "fullscreen") && attributes.fullscreen) flags |= cast WindowFlags.WINDOW_FLAG_FULLSCREEN;
-		if (Reflect.hasField(attributes, "hidden") && attributes.hidden) flags |= cast WindowFlags.WINDOW_FLAG_HIDDEN;
-		if (Reflect.hasField(attributes, "maximized") && attributes.maximized) flags |= cast WindowFlags.WINDOW_FLAG_MAXIMIZED;
-		if (Reflect.hasField(attributes, "minimized") && attributes.minimized) flags |= cast WindowFlags.WINDOW_FLAG_MINIMIZED;
-		if (Reflect.hasField(attributes, "resizable") && attributes.resizable) flags |= cast WindowFlags.WINDOW_FLAG_RESIZABLE;
 
 		if (contextAttributes.antialiasing >= 4)
 		{
@@ -102,11 +115,54 @@ class NativeWindow
 		if (contextAttributes.stencil) flags |= cast WindowFlags.WINDOW_FLAG_STENCIL_BUFFER;
 		if (contextAttributes.vsync) flags |= cast WindowFlags.WINDOW_FLAG_VSYNC;
 
-		var width = Reflect.hasField(attributes, "width") ? attributes.width : #if desktop 800 #else 0 #end;
-		var height = Reflect.hasField(attributes, "height") ? attributes.height : #if desktop 600 #else 0 #end;
-
 		#if (!macro && lime_cffi)
 		handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title);
+		#end
+
+		finishInit(contextAttributes);
+
+		created = true;
+	}
+
+	public function createFrom(foreignHandle:Int):Void
+	{
+		if (created) {
+			return;
+		}
+
+		var attributes = parent.__attributes;
+		var contextAttributes = Reflect.hasField(attributes, "context") ? attributes.context : {};
+		if (!Reflect.hasField(contextAttributes, "hardware")) contextAttributes.hardware = true;
+		if (!Reflect.hasField(contextAttributes, "vsync")) contextAttributes.vsync = false;
+
+		#if (cairo || (!lime_opengl && !lime_opengles))
+		contextAttributes.type = CAIRO;
+		#end
+		if (Reflect.hasField(contextAttributes, "type") && contextAttributes.type == CAIRO) contextAttributes.hardware = false;
+
+		var renderFlags = 0;
+		if (contextAttributes.hardware) renderFlags |= cast WindowFlags.WINDOW_FLAG_HARDWARE;
+		if (contextAttributes.vsync) renderFlags |= cast WindowFlags.WINDOW_FLAG_VSYNC;
+
+		#if (!macro && lime_cffi)
+		handle = NativeCFFI.lime_window_create_from(parent.application.__backend.handle, foreignHandle, renderFlags);
+		#end
+
+		contextAttributes.antialiasing = 0;
+		contextAttributes.background = 0;
+		contextAttributes.colorDepth = 24;
+		contextAttributes.depth = true;
+		contextAttributes.stencil = true;
+
+		finishInit(contextAttributes);
+
+		created = true;
+	}
+
+	private function finishInit(contextAttributes:RenderContextAttributes):Void
+	{
+		#if (!macro && lime_cffi)
+		var attributes = parent.__attributes;
 
 		if (handle != null)
 		{
@@ -175,6 +231,7 @@ class NativeWindow
 		parent.context = context;
 
 		setFrameRate(Reflect.hasField(attributes, "frameRate") ? attributes.frameRate : 60);
+
 		#end
 	}
 
