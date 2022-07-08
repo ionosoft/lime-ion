@@ -58,6 +58,7 @@ class Preloader #if flash extends Sprite #end
 
 		bytesLoaded = 0;
 		bytesTotal = 0;
+
 		libraries = new Array<#if !disable_preloader_assets AssetLibrary #else Dynamic #end>();
 		libraryNames = new Array<String>();
 
@@ -158,7 +159,7 @@ class Preloader #if flash extends Sprite #end
 					}
 					else
 					{
-						bytesLoaded += library.bytesTotal - bytesLoadedCache.get(library);
+						bytesLoaded += Std.int(library.bytesTotal) - bytesLoadedCache.get(library);
 					}
 
 					loadedAssetLibrary();
