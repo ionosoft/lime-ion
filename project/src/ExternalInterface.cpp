@@ -3698,7 +3698,7 @@ namespace lime {
 		targetWindow->SetTextInputEnabled (enabled);
 
 	}
-	
+
 	void lime_window_set_text_input_rect (value window, value rect) {
 
 		Window* targetWindow = (Window*)val_data (window);
@@ -4050,6 +4050,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_I32, hl_file_watcher_add_directory, _TCFFIPOINTER _STRING _BOOL);
 	DEFINE_HL_PRIM (_VOID, hl_file_watcher_remove_directory, _TCFFIPOINTER _I32);
 	DEFINE_HL_PRIM (_VOID, hl_file_watcher_update, _TCFFIPOINTER);
+	DEFINE_HL_PRIM (_I32, hl_font_get_ascender, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_I32, hl_font_get_descender, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_BYTES, hl_font_get_family_name, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_I32, hl_font_get_glyph_index, _TCFFIPOINTER _STRING);
@@ -4139,6 +4140,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_context_unlock, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create_from, _TCFFIPOINTER _I32 _I32);
+	DEFINE_HL_PRIM (_VOID, hl_window_event_manager_register, _FUN (_VOID, _NO_ARG) _TWINDOW_EVENT);
 	DEFINE_HL_PRIM (_VOID, hl_window_focus, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_F64, hl_window_get_context, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_BYTES, hl_window_get_context_type, _TCFFIPOINTER);

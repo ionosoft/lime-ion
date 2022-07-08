@@ -332,7 +332,7 @@ namespace lime {
 				break;
 
 			case SDL_QUIT:
-				
+
 				if (!isFirstNonActivePass) {
 					active = false;
 					isExecuting = false;
@@ -957,7 +957,7 @@ namespace lime {
 			active = true;
 			isFirstNonActivePass = false;
 		}
-		
+
 		queueLength = numEvents;
 
 		if (queueLength > queueMaxLength) {
@@ -974,7 +974,7 @@ namespace lime {
 				queueMaxLength = queueLength;
 			}
 		}
-		
+
 		int nextEvent;
 		int numPending = GetPendingEvents (eventQueue, queueLength);
 
@@ -984,7 +984,7 @@ namespace lime {
 			// only allow GC free objects while we're handling events
 			/*if (isGCBlocking) System::GCExitBlocking ();
 			isGCBlocking = false;*/
-			
+
 			for (nextEvent = 0; nextEvent < numPending; ++nextEvent) {
 
 				if (SDL_MOUSEMOTION == eventQueue[nextEvent].type) {
@@ -1100,7 +1100,7 @@ namespace lime {
 
 	}
 
-	
+
 	int SDLApplication::GetPendingEvents (SDL_Event* events, int maxEvents)
 	{
 		SDL_PumpEvents ();

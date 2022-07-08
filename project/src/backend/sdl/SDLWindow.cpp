@@ -32,7 +32,7 @@ namespace lime {
 
 
 	SDLWindow::SDLWindow (Application* application) : Window (application) {
-	
+
 		sdlTexture = 0;
 		sdlRenderer = 0;
 		context = 0;
@@ -40,9 +40,10 @@ namespace lime {
 		contextWidth = 0;
 		contextHeight = 0;
 
+		currentApplication = application;
 	}
-	
-	
+
+
 	SDLWindow::~SDLWindow () {
 
 		if (sdlWindow) {
@@ -66,7 +67,6 @@ namespace lime {
 
 
 	void SDLWindow::Create (int width, int height, int flags, const char* title) {
-
 		this->flags = flags;
 
 		int sdlWindowFlags = 0;
@@ -1052,7 +1052,7 @@ namespace lime {
 		}
 
 	}
-	
+
 	void SDLWindow::SetTextInputRect (Rectangle * rect) {
 
 		SDL_Rect bounds = { 0, 0, 0, 0 };
