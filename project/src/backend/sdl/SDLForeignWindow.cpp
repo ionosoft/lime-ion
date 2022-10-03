@@ -9,7 +9,9 @@ namespace lime {
 	static int maxAttempts = 5;
 
 
-	SDLForeignWindow::SDLForeignWindow (Application* application) : SDLWindow (application) { }
+	SDLForeignWindow::SDLForeignWindow (Application* application) : SDLWindow (application) {
+		currentApplication = application;
+	 }
 
 	void SDLForeignWindow::CreateFrom (const void* foreignHandle, int renderFlags) {
 
@@ -58,7 +60,7 @@ namespace lime {
 
 				// Initialize the video subsystem in case it isn't already initialized, and try again
 				SDL_Init (SDL_INIT_VIDEO|SDL_INIT_EVENTS);
-				
+
 				tries++;
 			}
 
@@ -174,7 +176,7 @@ namespace lime {
 			printf("Could not create SDL renderer: %s.\n", SDL_GetError ());
 
 		}
-		
+
 		//printf ("Any lingering SDL errors post-window creation? %s.\n", SDL_GetError ());
 
 	}
