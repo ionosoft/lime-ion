@@ -47,12 +47,6 @@ namespace lime {
 
 		framePeriod = 1000.0 / 60.0;
 
-		#ifdef EMSCRIPTEN
-		emscripten_cancel_main_loop ();
-		emscripten_set_main_loop (UpdateFrame, 0, 0);
-		emscripten_set_main_loop_timing (EM_TIMING_RAF, 1);
-		#endif
-
 		currentUpdate = 0;
 		lastUpdate = 0;
 		nextUpdate = 0;
@@ -114,6 +108,12 @@ namespace lime {
 		Init ();
 
 		isExecuting = true;
+
+		#ifdef EMSCRIPTEN
+		emscripten_cancel_main_loop ();
+		emscripten_set_main_loop (UpdateFrame, 0, 0);
+		emscripten_set_main_loop_timing (EM_TIMING_RAF, 1);
+		#endif
 
 		#if defined(IPHONE) || defined(EMSCRIPTEN)
 
@@ -910,7 +910,7 @@ namespace lime {
 
 			currentUpdate = SDL_GetTicks ();
 
-		#if defined (IPHONE)
+		#if defined (IPHONE) || defined (EMSCRIPTEN)
 
 			if (currentUpdate >= nextUpdate) {
 
@@ -919,12 +919,6 @@ namespace lime {
 				event.type = -1;
 
 			}
-
-		#elif defined (EMSCRIPTEN)
-
-			event.type = SDL_USEREVENT;
-			HandleEvent (&event);
-			event.type = -1;
 
 		#else
 
