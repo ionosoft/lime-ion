@@ -54,6 +54,7 @@
 #endif
 
 #include <cstdlib>
+#include <cstring>
 
 DEFINE_KIND (k_finalizer);
 
@@ -164,6 +165,54 @@ namespace lime {
 			return new std::wstring (converter.from_bytes (_val));
 			#else
 			return new std::wstring (_val.begin (), _val.end ());
+			#endif
+
+		} else {
+
+			return 0;
+
+		}
+
+	}
+
+
+	value wstring_to_value (std::wstring* val) {
+
+		if (val) {
+
+			#ifdef HX_WINDOWS
+			return alloc_wstring (val->c_str ());
+			#else
+			std::string _val = std::string (val->begin (), val->end ());
+			return alloc_string (_val.c_str ());
+			#endif
+
+		} else {
+
+			return 0;
+
+		}
+
+	}
+
+
+	vbyte* wstring_to_vbytes (std::wstring* val) {
+
+		if (val) {
+
+			#ifdef HX_WINDOWS
+			int size = std::wcslen (val->c_str ());
+			char* result = (char*)malloc (size + 1);
+			std::wcstombs (result, val->c_str (), size);
+			result[size] = '\0';
+			return (vbyte*)result;
+			#else
+			std::string _val = std::string (val->begin (), val->end ());
+			int size = std::strlen (_val.c_str ());
+			char* result = (char*)malloc (size + 1);
+			std::strncpy (result, _val.c_str (), size);
+			result[size] = '\0';
+			return (vbyte*)result;
 			#endif
 
 		} else {
@@ -703,7 +752,7 @@ namespace lime {
 
 		if (path) {
 
-			value _path = alloc_wstring (path->c_str ());
+			value _path = wstring_to_value (path);
 			delete path;
 			return _path;
 
@@ -736,13 +785,9 @@ namespace lime {
 
 		if (path) {
 
-			int size = std::wcslen (path->c_str ());
-			char* result = (char*)malloc (size + 1);
-			std::wcstombs (result, path->c_str (), size);
-			result[size] = '\0';
+			vbyte* _path = wstring_to_vbytes (path);
 			delete path;
-
-			return (vbyte*)result;
+			return _path;
 
 		} else {
 
@@ -773,7 +818,7 @@ namespace lime {
 
 		if (path) {
 
-			value _path = alloc_wstring (path->c_str ());
+			value _path = wstring_to_value (path);
 			delete path;
 			return _path;
 
@@ -806,13 +851,9 @@ namespace lime {
 
 		if (path) {
 
-			int size = std::wcslen (path->c_str ());
-			char* result = (char*)malloc (size + 1);
-			std::wcstombs (result, path->c_str (), size);
-			result[size] = '\0';
+			vbyte* _path = wstring_to_vbytes (path);
 			delete path;
-
-			return (vbyte*)result;
+			return _path;
 
 		} else {
 
@@ -846,7 +887,8 @@ namespace lime {
 
 		for (int i = 0; i < files.size (); i++) {
 
-			val_array_set_i (result, i, alloc_wstring (files[i]->c_str ()));
+			value _file = wstring_to_value (files[i]);
+			val_array_set_i (result, i, _file);
 			delete files[i];
 
 		}
@@ -880,12 +922,8 @@ namespace lime {
 
 		for (int i = 0; i < files.size (); i++) {
 
-			int size = std::wcslen (files[i]->c_str ());
-			char* _file = (char*)malloc (size + 1);
-			std::wcstombs (_file, files[i]->c_str (), size);
-			_file[size] = '\0';
-
-			*resultData++ = (vbyte*)_file;
+			vbyte* _file = wstring_to_vbytes (files[i]);
+			*resultData++ = _file;
 			delete files[i];
 
 		}
@@ -915,7 +953,7 @@ namespace lime {
 
 		if (path) {
 
-			value _path = alloc_wstring (path->c_str ());
+			value _path = wstring_to_value (path);
 			delete path;
 			return _path;
 
@@ -948,13 +986,9 @@ namespace lime {
 
 		if (path) {
 
-			int size = std::wcslen (path->c_str ());
-			char* result = (char*)malloc (size + 1);
-			std::wcstombs (result, path->c_str (), size);
-			result[size] = '\0';
+			vbyte* _path = wstring_to_vbytes (path);
 			delete path;
-
-			return (vbyte*)result;
+			return _path;
 
 		} else {
 
