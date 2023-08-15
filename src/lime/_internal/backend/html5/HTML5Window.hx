@@ -254,6 +254,45 @@ class HTML5Window
 
 	public function close():Void
 	{
+		var element = parent.element;
+		if (element != null)
+		{
+			if (canvas != null)
+			{
+				if (element != cast canvas)
+				{
+					element.removeChild(canvas);
+				}
+				canvas = null;
+			}
+			else if (div != null)
+			{
+				element.removeChild(div);
+				div = null;
+			}
+
+			var events = ["mousedown", "mouseenter", "mouseleave", "mousemove", "mouseup", "wheel"];
+
+			for (event in events)
+			{
+				element.removeEventListener(event, handleMouseEvent, true);
+			}
+
+			element.removeEventListener("contextmenu", handleContextMenuEvent, true);
+
+			element.removeEventListener("dragstart", handleDragEvent, true);
+			element.removeEventListener("dragover", handleDragEvent, true);
+			element.removeEventListener("drop", handleDragEvent, true);
+
+			element.removeEventListener("touchstart", handleTouchEvent, true);
+			element.removeEventListener("touchmove", handleTouchEvent, true);
+			element.removeEventListener("touchend", handleTouchEvent, true);
+			element.removeEventListener("touchcancel", handleTouchEvent, true);
+
+			element.removeEventListener("gamepadconnected", handleGamepadEvent, true);
+			element.removeEventListener("gamepaddisconnected", handleGamepadEvent, true);
+		}
+
 		parent.application.__removeWindow(parent);
 	}
 
@@ -931,6 +970,10 @@ class HTML5Window
 
 	public function resize(width:Int, height:Int):Void {}
 
+	public function setMinSize(width:Int, height:Int):Void {}
+
+	public function setMaxSize(width:Int, height:Int):Void {}
+
 	public function setBorderless(value:Bool):Bool
 	{
 		return value;
@@ -1232,6 +1275,11 @@ class HTML5Window
 			Browser.document.title = value;
 		}
 
+		return value;
+	}
+
+	public function setVisible(value:Bool):Bool
+	{
 		return value;
 	}
 

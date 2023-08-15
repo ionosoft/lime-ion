@@ -49,6 +49,8 @@ namespace lime {
 			virtual void Move (int x, int y) = 0;
 			virtual void ReadPixels (ImageBuffer *buffer, Rectangle *rect) = 0;
 			virtual void Resize (int width, int height) = 0;
+			virtual void SetMinimumSize (int width, int height) = 0;
+			virtual void SetMaximumSize (int width, int height) = 0;
 			virtual bool SetBorderless (bool borderless) = 0;
 			virtual void SetCursor (Cursor cursor) = 0;
 			virtual void SetDisplayMode (DisplayMode* displayMode) = 0;
@@ -62,6 +64,7 @@ namespace lime {
 			virtual void SetTextInputEnabled (bool enable) = 0;
 			virtual void SetTextInputRect (Rectangle *rect) = 0;
 			virtual const char* SetTitle (const char* title) = 0;
+			virtual bool SetVisible (bool visible) = 0;
 			virtual void WarpMouse (int x, int y) = 0;
 
 			Application* currentApplication;
