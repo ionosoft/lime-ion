@@ -465,7 +465,7 @@ class NativeHTTPRequest
 	private static function localThreadPool_onError(state:{instance:NativeHTTPRequest, promise:Promise<Bytes>, error:String}):Void
 	{
 		var promise:Promise<Bytes> = state.promise;
-		promise.error(new _HTTPRequestErrorResponse(state.error, null));
+		promise.error(state.error);
 
 		var instance = state.instance;
 
@@ -576,21 +576,16 @@ class NativeHTTPRequest
 				}
 				else if (instance.bytes != null)
 				{
-					var error = instance.bytes.getString(0, instance.bytes.length);
-					var responseData = instance.buildBuffer();
-					instance.promise.error(new _HTTPRequestErrorResponse(error, responseData));
+					instance.promise.error(instance.bytes.getString(0, instance.bytes.length));
 				}
 				else
 				{
-					var error = 'Status ${state.status}';
-					var responseData = instance.buildBuffer();
-					instance.promise.error(new _HTTPRequestErrorResponse(error, responseData));
+					instance.promise.error('Status ${state.status}');
 				}
 			}
 			else
 			{
-				var error = CURL.strerror(state.result);
-				instance.promise.error(new _HTTPRequestErrorResponse(error, null));
+				instance.promise.error(CURL.strerror(state.result));
 			}
 
 			if (instance.timeout != null)

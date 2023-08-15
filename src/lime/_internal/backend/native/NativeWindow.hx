@@ -518,26 +518,6 @@ class NativeWindow
 		}
 	}
 
-	public function setMinSize(width:Int, height:Int):Void
-	{
-		if (handle != null)
-		{
-			#if (!macro && lime_cffi)
-			NativeCFFI.lime_window_set_minimum_size(handle, width, height);
-			#end
-		}
-	}
-
-	public function setMaxSize(width:Int, height:Int):Void
-	{
-		if (handle != null)
-		{
-			#if (!macro && lime_cffi)
-			NativeCFFI.lime_window_set_maximum_size(handle, width, height);
-			#end
-		}
-	}
-
 	public function setBorderless(value:Bool):Bool
 	{
 		if (handle != null)
@@ -750,18 +730,6 @@ class NativeWindow
 		{
 			#if (!macro && lime_cffi)
 			return NativeCFFI.lime_window_set_title(handle, value);
-			#end
-		}
-
-		return value;
-	}
-
-	public function setVisible(value:Bool):Bool
-	{
-		if (handle != null)
-		{
-			#if (!macro && lime_cffi)
-			NativeCFFI.lime_window_set_visible(handle, value);
 			#end
 		}
 

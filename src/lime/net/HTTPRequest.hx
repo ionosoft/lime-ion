@@ -106,11 +106,7 @@ public function load(uri:String = null):Future<T>
 		var future = __backend.loadData(this.uri);
 
 		future.onProgress(promise.progress);
-		future.onError(function(errorResponse:_HTTPRequestErrorResponse<T>)
-		{
-			responseData = errorResponse.responseData;
-			promise.error(errorResponse.error);
-		});
+		future.onError(promise.error);
 
 		future.onComplete(function(bytes)
 		{
@@ -144,11 +140,7 @@ public function load(uri:String = null):Future<T>
 		var future = __backend.loadText(this.uri);
 
 		future.onProgress(promise.progress);
-		future.onError(function(errorResponse:_HTTPRequestErrorResponse<T>)
-		{
-			responseData = errorResponse.responseData;
-			promise.error(errorResponse.error);
-		});
+		future.onError(promise.error);
 
 		future.onComplete(function(text)
 		{
@@ -157,15 +149,6 @@ public function load(uri:String = null):Future<T>
 		});
 
 		return promise.future;
-	}
-}
-
-@:noCompletion class _HTTPRequestErrorResponse<T> {
-	public var error:Dynamic;
-	public var responseData:T;
-	public function new(error:Dynamic, responseData:T) {
-		this.error = error;
-		this.responseData = responseData;
 	}
 }
 

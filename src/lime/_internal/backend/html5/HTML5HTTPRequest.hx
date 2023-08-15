@@ -407,28 +407,29 @@ class HTML5HTTPRequest
 		{
 			if (request.readyState != 4) return;
 
-			var bytes = null;
-			if (request.responseType == NONE)
-			{
-				if (request.responseText != null)
-				{
-					bytes = Bytes.ofString(request.responseText);
-				}
-			}
-			else if (request.response != null)
-			{
-				bytes = Bytes.ofData(request.response);
-			}
-
 			if (request.status != null && ((request.status >= 200 && request.status < 400) || (validStatus0 && request.status == 0)))
 			{
+				var bytes = null;
+
+				if (request.responseType == NONE)
+				{
+					if (request.responseText != null)
+					{
+						bytes = Bytes.ofString(request.responseText);
+					}
+				}
+				else if (request.response != null)
+				{
+					bytes = Bytes.ofData(request.response);
+				}
+
 				processResponse();
 				promise.complete(bytes);
 			}
 			else
 			{
 				processResponse();
-				promise.error(new _HTTPRequestErrorResponse(request.status, bytes));
+				promise.error(request.status);
 			}
 
 			request = null;
@@ -481,7 +482,7 @@ class HTML5HTTPRequest
 				activeRequests--;
 				processQueue();
 
-				promise.error(new _HTTPRequestErrorResponse(event.detail, null));
+				promise.error(event.detail);
 			}, false);
 
 			image.src = uri;
@@ -504,7 +505,7 @@ class HTML5HTTPRequest
 
 			request.onerror = function(event:ErrorEvent)
 			{
-				promise.error(new _HTTPRequestErrorResponse(event.message, null));
+				promise.error(event.message);
 			}
 
 			request.onprogress = function(event:ProgressEvent)
@@ -541,7 +542,7 @@ class HTML5HTTPRequest
 			else
 			{
 				processResponse();
-				promise.error(new _HTTPRequestErrorResponse(request.status, request.responseText));
+				promise.error(request.status);
 			}
 
 			request = null;

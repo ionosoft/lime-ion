@@ -141,13 +141,12 @@ class System
 	#if (!lime_doc_gen || sys)
 	public static function exit(code:Int):Void
 	{
-		var currentApp = Application.current;
-		#if ((sys || (js && html5) || air) && !macro)
-		if (currentApp != null)
+		#if ((sys || air) && !macro)
+		if (Application.current != null)
 		{
-			currentApp.onExit.dispatch(code);
+			Application.current.onExit.dispatch(code);
 
-			if (currentApp.onExit.canceled)
+			if (Application.current.onExit.canceled)
 			{
 				return;
 			}
@@ -156,11 +155,6 @@ class System
 
 		#if sys
 		Sys.exit(code);
-		#elseif (js && html5)
-		if (currentApp != null && currentApp.window != null)
-		{
-			currentApp.window.close();
-		}
 		#elseif air
 		NativeApplication.nativeApplication.exit(code);
 		#end

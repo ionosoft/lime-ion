@@ -1179,7 +1179,7 @@ class CommandLineTools
 					if ((extension == "lime" && file != "include.lime")
 						|| (extension == "nmml" && file != "include.nmml")
 						|| (extension == "xml" && file != "include.xml")
-						|| (extension == "hxp" && file != "include.hxp"))
+						|| extension == "hxp")
 					{
 						matches.get(extension).push(path);
 					}
